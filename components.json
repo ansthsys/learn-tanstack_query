@@ -13,10 +13,10 @@
   "iconLibrary": "lucide",
   "rtl": false,
   "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
+    "components": "@/components/organisms",
+    "utils": "@/utils/classname",
+    "ui": "@/components/atoms/ui",
+    "lib": "@/utils",
     "hooks": "@/hooks"
   },
   "menuColor": "default",
