@@ -23,4 +23,17 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    files: ['src/components/atoms/ui/**'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    files: ['vite.config.ts', 'eslint.config.js'],
+    rules: {
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+    },
+  },
 ])
