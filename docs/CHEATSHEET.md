@@ -5,8 +5,8 @@
 ## Setup
 
 ```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
-npm install -D json-server
+bun add @tanstack/react-query @tanstack/react-query-devtools
+bun add -D json-server
 ```
 
 ```jsx
@@ -207,10 +207,10 @@ gcTime = 5 * 60_000 (default)
 
 ```bash
 # Install
-npm install -D json-server
+bun add -D json-server
 
 # Jalankan dengan delay simulasi network
-npx json-server ./api/db.json --port 3001 --delay 500
+bun x json-server ./api/db.json --port 3001 --delay 500
 
 # Endpoints otomatis dari db.json:
 GET    /users          → semua users

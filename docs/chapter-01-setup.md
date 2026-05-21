@@ -68,8 +68,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 ## Coba Sekarang
 
-1. Jalankan `npm run server` → pastikan http://localhost:3001/users tampil data
-2. Jalankan `npm run dev`
+1. Jalankan \`bun run server\` → pastikan http://localhost:3001/users tampil data
+2. Jalankan \`bun run dev\`
 3. Buka browser, klik icon TanStack Query DevTools (pojok bawah)
 4. Belum ada query — normal, kita mulai di chapter 02
 

@@ -8,12 +8,12 @@
 
 ```bash
 # 1. Buat proyek Vite
-npm create vite@latest tanstack-learn -- --template react
+bun create vite@latest tanstack-learn -- --template react
 cd tanstack-learn
 
 # 2. Install dependencies
-npm install @tanstack/react-query @tanstack/react-query-devtools
-npm install -D json-server
+bun add @tanstack/react-query @tanstack/react-query-devtools
+bun add -D json-server
 
 # 3. Buat file db.json (dummy backend)
 # → lihat file db.json di silabus ini
@@ -22,8 +22,8 @@ npm install -D json-server
 # "server": "json-server --watch ./api/db.json --port 3001"
 
 # 5. Jalankan dua terminal:
-npm run dev       # terminal 1 → React di port 5173
-npm run server    # terminal 2 → JSON Server di port 3001
+bun run dev       # terminal 1 → React di port 5173
+bun run server    # terminal 2 → JSON Server di port 3001
 ```
 
 ---
