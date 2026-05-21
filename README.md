@@ -1,75 +1,66 @@
-# React + TypeScript + Vite
+# Belajar TanStack Query — Silabus Lengkap
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Stack: React + Vite + TanStack Query v5 + JSON Server (dummy backend)
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Setup Proyek (Lakukan Sekali)
 
-## React Compiler
+```bash
+# 1. Buat proyek Vite
+npm create vite@latest tanstack-learn -- --template react
+cd tanstack-learn
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+# 2. Install dependencies
+npm install @tanstack/react-query @tanstack/react-query-devtools
+npm install -D json-server
 
-Note: This will impact Vite dev & build performances.
+# 3. Buat file db.json (dummy backend)
+# → lihat file db.json di silabus ini
 
-## Expanding the ESLint configuration
+# 4. Tambahkan script di package.json
+# "server": "json-server --watch db.json --port 3001"
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 5. Jalankan dua terminal:
+npm run dev       # terminal 1 → React di port 5173
+npm run server    # terminal 2 → JSON Server di port 3001
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Struktur Folder yang Dipakai
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── api/            ← semua fungsi fetcher
+├── hooks/          ← custom hooks useQuery/useMutation
+├── components/     ← UI komponen
+├── pages/          ← halaman per chapter
+└── main.jsx        ← QueryClient setup
+```
+
+---
+
+## Silabus
+
+| Chapter | Topik | Konsep Utama |
+|---------|-------|--------------|
+| 01 | Setup & QueryClient | Provider, DevTools |
+| 02 | useQuery Dasar | queryKey, queryFn, states |
+| 03 | Query States & UI | isLoading, isError, isFetching |
+| 04 | Query Keys Dinamis | key array, re-fetch otomatis |
+| 05 | useMutation Dasar | POST, onSuccess, onError |
+| 06 | Invalidate Queries | invalidateQueries, refetch |
+| 07 | Optimistic Updates | onMutate, rollback |
+| 08 | Pagination | keepPreviousData, page param |
+| 09 | Infinite Scroll | useInfiniteQuery, fetchNextPage |
+| 10 | Dependent Queries | enabled flag, query chaining |
+| 11 | Parallel Queries | useQueries, multiple fetches |
+| 12 | Prefetching | prefetchQuery, hover prefetch |
+| 13 | staleTime & gcTime | cache lifetime, background refetch |
+| 14 | Select & Transform | select option, data transform |
+| 15 | Global Error Handling | QueryCache callbacks |
+
+---
+
+Tiap chapter punya: **db.json data** · **kode lengkap** · **yang perlu dicoba** · **cheatsheet konsep**
