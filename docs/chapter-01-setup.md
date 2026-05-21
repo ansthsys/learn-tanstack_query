@@ -12,12 +12,10 @@ konfigurasi global, dan perlu di-wrap ke seluruh app lewat QueryClientProvider.
 {
   "scripts": {
     "dev": "vite",
-    "server": "json-server --watch db.json --port 3001 --delay 500"
+    "server": "json-server --watch ./api/db.json --port 3001"
   }
 }
 ```
-
-> `--delay 500` → simulasi network latency 500ms, berguna saat belajar loading states
 
 ---
 

@@ -19,7 +19,7 @@ npm install -D json-server
 # → lihat file db.json di silabus ini
 
 # 4. Tambahkan script di package.json
-# "server": "json-server --watch db.json --port 3001"
+# "server": "json-server --watch ./api/db.json --port 3001"
 
 # 5. Jalankan dua terminal:
 npm run dev       # terminal 1 → React di port 5173

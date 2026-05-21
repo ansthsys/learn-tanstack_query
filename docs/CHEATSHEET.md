@@ -210,7 +210,7 @@ gcTime = 5 * 60_000 (default)
 npm install -D json-server
 
 # Jalankan dengan delay simulasi network
-npx json-server db.json --port 3001 --delay 500
+npx json-server ./api/db.json --port 3001 --delay 500
 
 # Endpoints otomatis dari db.json:
 GET    /users          → semua users
