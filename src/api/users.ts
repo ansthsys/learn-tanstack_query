@@ -11,10 +11,12 @@ export type User = {
 export type CreateUserPayload = Omit<User, "id">;
 export type UpdateUserPayload = Partial<CreateUserPayload>;
 
-export const getUsers = async (): Promise<User[]> => {
-  const { data } = await http.get<User[]>("/users");
-  return data;
-};
+export const getUsers = async (
+  params?: Record<string, string>,
+): Promise<User[]> => {
+  const { data } = await http.get<User[]>("/users", { params })
+  return data
+}
 
 export const getUserById = async (id: number): Promise<User> => {
   const { data } = await http.get<User>(`/users/${id}`);
