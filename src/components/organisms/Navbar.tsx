@@ -12,6 +12,8 @@ import {
 
 const menuItems = [
   { label: "Home", to: "/" },
+  { label: "Posts", to: "/posts" },
+  { label: "Comments", to: "/comments" },
   { label: "About", to: "/about" },
 ]
 
