@@ -1,4 +1,5 @@
 {
+  "$schema": ["../node_modules/json-server/schema.json"],
   "users": [
     { "id": 1, "name": "Budi Santoso", "email": "budi@mail.com", "role": "admin", "active": true },
     { "id": 2, "name": "Sari Dewi", "email": "sari@mail.com", "role": "editor", "active": true },
