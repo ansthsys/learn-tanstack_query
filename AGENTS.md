@@ -26,19 +26,25 @@ src/
 │   └── styles/app.css        tailwind + shadcn vars + semantic colors
 ├── components/
 │   ├── atoms/
-│   │   ├── ui/               shadcn only (button, sheet, table, pagination, badge)
+│   │   ├── ui/               shadcn only (button, sheet, table, pagination, badge, dialog, alert-dialog, input, label, select, checkbox)
 │   │   └── Badge.tsx         custom atom — semantic variants wrapper
 │   ├── molecules/
-│   │   ├── PageHeader.tsx    title + description
+│   │   ├── PageHeader.tsx    title + description + action slot
 │   │   ├── Table.tsx         generic table, handle loading/empty/data
-│   │   └── Pagination.tsx    page / totalPages / onPageChange
+│   │   ├── Pagination.tsx    page / totalPages / onPageChange
+│   │   └── UserFilters.tsx   search name + role select + status select
 │   ├── organisms/
 │   │   ├── Navbar.tsx        responsive navbar + mobile sheet drawer
-│   │   └── UserTable.tsx     user columns + pagination
+│   │   ├── UserTable.tsx     user columns + actions (edit/delete) + pagination
+│   │   └── UserForm.tsx      form fields layout (name, email, role, active)
 │   ├── templates/
 │   │   └── AppLayout.tsx     Navbar + Outlet
 │   └── pages/
-│       ├── Home.tsx          useQuery → UserTable
+│       ├── Home.tsx          useQuery(["users", filters]) → UserTable
+│       ├── UsersCreate.tsx   create user form page (no mutation yet)
+│       ├── UsersEdit.tsx     edit user form page + delete alert dialog (no mutation yet)
+│       ├── Posts.tsx         placeholder
+│       ├── Comments.tsx      placeholder
 │       └── About.tsx         placeholder
 ├── utils/classname.ts        cn()
 ├── App.tsx                   layout route pattern
@@ -63,6 +69,7 @@ src/
 | Export | Named export (`export function`) bukan `export default` |
 | State management | Hooks/state di organism & page — molecule pure props |
 | Data fetching | Molecule tidak boleh fetching — hanya Page atau Organism |
+| `useState` | Hanya di Page — organism terima props, molecule pure render |
 
 ## Color System (dari app.css)
 
@@ -79,8 +86,12 @@ src/
 | Chapter | Status | Catatan |
 |---------|--------|---------|
 | 01 — Setup & QueryClient | ✅ Done | QueryClient, Provider, DevTools |
-| 02 — useQuery Dasar | ✅ Done | Fetch user list, loading/empty states, pagination, navbar |
-| 03 — useMutation | ⏳ Next | Create, update, delete user |
+| 02 — useQuery Dasar | ✅ Done | Fetch user list, loading/empty states, pagination, navbar, filtering |
+| 03 — Query Keys Dinamis | ⏳ Next | Query key dependency, `enabled`, cache behavior, hierarchical invalidation |
+| 04 — useMutation | ⏳ | Create, update, delete user via `useMutation` + `invalidateQueries` |
+| 05 — Optimistic Update | ⏳ | Cache update before server response |
+| 06-07 — Pagination & Infinite Query | ⏳ | Server-side pagination, `useInfiniteQuery` |
+| 08-14 — Advanced | ⏳ | Refetch, retry, stale time, parallel & dependent query |
 
 ## Session Resume (22 May 2026)
 
@@ -91,11 +102,15 @@ src/
 | Navbar | organism | Responsive, hamburger → Sheet (shadcn) |
 | AppLayout | template | Navbar + `<Outlet />` + `max-w-6xl` container |
 | Badge | atom | Custom — primary/secondary/success/warning/info/error/muted |
-| PageHeader | molecule | title + description props |
+| PageHeader | molecule | title + description + action slot |
 | Table | molecule | Generic `<T>`, loading skeleton, empty state, data render |
 | Pagination | molecule | page / totalPages / onPageChange |
-| UserTable | organism | Columns + Badge render + Pagination — no fetching |
-| Home | page | `useQuery(["users"], getUsers)` → `UserTable` |
+| UserFilters | molecule | search name + role select + status select — pure props |
+| UserTable | organism | Columns + Badge render + Actions (Edit/Delete) + Pagination — no fetching |
+| UserForm | organism | Form fields layout (name, email, role, active) |
+| Home | page | `useQuery(["users", filters], getUsers)` + filter state → `UserTable` |
+| UsersCreate | page | Create user form (no mutation yet) |
+| UsersEdit | page | Edit user form + delete AlertDialog (no mutation yet) |
 
 ### State management pattern
 
@@ -108,15 +123,17 @@ Page (query + state) → Organism (logic + props) → Molecule (render only) →
 ```
 Home.tsx
   ├── useQuery → { data: users, isLoading }
+  │   queryKey: ["users", filters]  ← refetch otomatis saat filter berubah
   └── UserTable(data={users ?? []}, isLoading={isLoading})
         ├── Table(columns, data=slice(page))
         ├── Pagination(page, totalPages, onPageChange)
         └── Badge(row.render) — inline via column def
 ```
 
-### Next up — Chapter 03: useMutation
+### Next up — Chapter 03: Query Keys Dinamis
 
-- `createUser`, `updateUser`, `deleteUser`
-- `useMutation` + `queryClient.invalidateQueries()`
-- Optimistic updates
-- Form component + dialog/modal
+- Dynamic query key dengan filter dependency (partial — sudah di Home.tsx)
+- `enabled` — conditional fetching (belum)
+- Cache behavior: beda key = beda cache, instant return saat pilih key yang sudah pernah dipakai
+- Hierarchical invalidation: `['posts']` mencakup `['posts', 1]`, `['posts', 'byUser', 2]`, dll
+- Praktik dengan posts/byUser, posts detail
