@@ -13,7 +13,11 @@ JSON Server di `api/db.json` (port 3001).
 | `cf59f06` | `feat: replace legacy styles with tailwind v4 and shadcn/ui` |
 | `7fa1afd` | `feat: restructure to atomic design folders` |
 | `12c20a6` | `feat: configure theming and fix eslint config` |
-| `HEAD` | `feat: implement useQuery dasar with user list and navbar layout` |
+| `4c761a0` | `feat: implement useQuery dasar with user list and navbar layout` |
+| `61ed7e0` | `feat: setup UI untuk create, edit, delete user` |
+| `b194b2a` | `feat: add user filtering (search name, role, status)` |
+| `a11edb5` | `chore: fix agents chapter numbering and update structure` |
+| `afb808a` | `feat: implement chapter 03 - query keys dinamis` |
 
 ## Struktur Folder
 
@@ -21,7 +25,9 @@ JSON Server di `api/db.json` (port 3001).
 src/
 ├── api/
 │   ├── http.ts               axios instance
-│   └── users.ts              user CRUD fetcher
+│   ├── users.ts              user CRUD fetcher
+│   ├── posts.ts              post CRUD fetcher + getPostsByUser
+│   └── comments.ts           comment CRUD fetcher + getCommentsByPost
 ├── assets/
 │   └── styles/app.css        tailwind + shadcn vars + semantic colors
 ├── components/
@@ -43,8 +49,8 @@ src/
 │       ├── Home.tsx          useQuery(["users", filters]) → UserTable
 │       ├── UsersCreate.tsx   create user form page (no mutation yet)
 │       ├── UsersEdit.tsx     edit user form page + delete alert dialog (no mutation yet)
-│       ├── Posts.tsx         placeholder
-│       ├── Comments.tsx      placeholder
+│       ├── Posts.tsx         3 query key demos + hierarchical invalidation
+│       ├── Comments.tsx      dependent query — post → comments
 │       └── About.tsx         placeholder
 ├── utils/classname.ts        cn()
 ├── App.tsx                   layout route pattern
@@ -87,8 +93,8 @@ src/
 |---------|--------|---------|
 | 01 — Setup & QueryClient | ✅ Done | QueryClient, Provider, DevTools |
 | 02 — useQuery Dasar | ✅ Done | Fetch user list, loading/empty states, pagination, navbar, filtering |
-| 03 — Query Keys Dinamis | ⏳ Next | Query key dependency, `enabled`, cache behavior, hierarchical invalidation |
-| 04 — useMutation | ⏳ | Create, update, delete user via `useMutation` + `invalidateQueries` |
+| 03 — Query Keys Dinamis | ✅ Done | Query key dependency, `enabled`, cache behavior, hierarchical invalidation |
+| 04 — useMutation | ⏳ Next | Create, update, delete user via `useMutation` + `invalidateQueries` |
 | 05 — Optimistic Update | ⏳ | Cache update before server response |
 | 06-07 — Pagination & Infinite Query | ⏳ | Server-side pagination, `useInfiniteQuery` |
 | 08-14 — Advanced | ⏳ | Refetch, retry, stale time, parallel & dependent query |
@@ -130,10 +136,30 @@ Home.tsx
         └── Badge(row.render) — inline via column def
 ```
 
-### Next up — Chapter 03: Query Keys Dinamis
+## Session Resume (28 May 2026)
 
-- Dynamic query key dengan filter dependency (partial — sudah di Home.tsx)
-- `enabled` — conditional fetching (belum)
-- Cache behavior: beda key = beda cache, instant return saat pilih key yang sudah pernah dipakai
-- Hierarchical invalidation: `['posts']` mencakup `['posts', 1]`, `['posts', 'byUser', 2]`, dll
-- Praktik dengan posts/byUser, posts detail
+### What was built
+
+| Komponen | Level | Keterangan |
+|----------|-------|------------|
+| posts.ts | api | Post CRUD + getPostsByUser — same pattern as users.ts |
+| comments.ts | api | Comment CRUD + getCommentsByPost — same pattern as users.ts |
+| Posts | page | 3 sections: all posts (`["posts"]`), filter by user (`["posts", "byUser", userId]` with `enabled`), post detail (`["posts", "detail", postId]` with `enabled`) + hierarchical invalidation button |
+| Comments | page | Dependent query: enter postId → fetch post + fetch comments (both gated on `enabled`) |
+
+### Concepts demonstrated
+
+| Konsep | Dimana |
+|--------|--------|
+| Different keys = separate cache | `["posts"]` vs `["posts", "byUser", 1]` |
+| Cache hit | Switch filter back to previously selected user — instant render |
+| `enabled` conditional fetch | Post Detail & By User — no query runs until user provides input |
+| Hierarchical invalidation | `invalidateQueries(["posts"])` refetches all `["posts", ...]` keys |
+| Dependent query | Comments page — both post and comments queries gated on postId |
+
+### Next up — Chapter 04: useMutation
+
+- `useMutation` untuk `createUser`, `updateUser`, `deleteUser`
+- `invalidateQueries({ queryKey: ["users"] })` setelah mutation success
+- Un-disable buttons di `UsersCreate.tsx` dan `UsersEdit.tsx`
+- Navigasi otomatis (`navigate("/")`) setelah create/update sukses
