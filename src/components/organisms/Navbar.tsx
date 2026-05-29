@@ -1,24 +1,25 @@
-import { useState } from "react"
-import { Link } from "react-router"
-import { Menu, X } from "lucide-react"
-import { Button } from "@/components/atoms/ui/button"
+import { useState } from "react";
+import { Link } from "react-router";
+import { Menu, X } from "lucide-react";
+import { Button } from "@/components/atoms/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetTitle,
   SheetTrigger,
-} from "@/components/atoms/ui/sheet"
+} from "@/components/atoms/ui/sheet";
 
 const menuItems = [
   { label: "Home", to: "/" },
   { label: "Posts", to: "/posts" },
+  { label: "Post-2", to: "/post-2" },
   { label: "Comments", to: "/comments" },
   { label: "About", to: "/about" },
-]
+];
 
 function Navbar() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
@@ -49,7 +50,9 @@ function Navbar() {
 
           <SheetContent side="right" className="!max-w-72">
             <SheetTitle className="sr-only">Menu</SheetTitle>
-            <SheetDescription className="sr-only">Navigation menu</SheetDescription>
+            <SheetDescription className="sr-only">
+              Navigation menu
+            </SheetDescription>
             <nav className="mt-8 flex flex-col gap-1">
               {menuItems.map((item) => (
                 <Button
@@ -67,7 +70,7 @@ function Navbar() {
         </Sheet>
       </div>
     </header>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;
