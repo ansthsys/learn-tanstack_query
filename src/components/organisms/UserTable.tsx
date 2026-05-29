@@ -1,8 +1,8 @@
-import { useState } from "react"
-import { Link } from "react-router"
-import { Pencil, Trash2 } from "lucide-react"
-import type { User } from "@/api/users"
-import { Button } from "@/components/atoms/ui/button"
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { Pencil, Trash2 } from "lucide-react";
+import { deleteUser, type User } from "@/api/users";
+import { Button } from "@/components/atoms/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,32 +12,50 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/atoms/ui/alert-dialog"
-import { Badge } from "@/components/atoms/Badge"
-import { Table, type Column } from "@/components/molecules/Table"
-import { Pagination } from "@/components/molecules/Pagination"
-import { cn } from "@/utils/classname"
+} from "@/components/atoms/ui/alert-dialog";
+import { Badge } from "@/components/atoms/Badge";
+import { Table, type Column } from "@/components/molecules/Table";
+import { Pagination } from "@/components/molecules/Pagination";
+import { cn } from "@/utils/classname";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const PAGE_SIZE = 5
+const PAGE_SIZE = 5;
 
-const roleVariant: Record<string, "primary" | "secondary" | "warning" | "info" | "error"> = {
+const roleVariant: Record<
+  string,
+  "primary" | "secondary" | "warning" | "info" | "error"
+> = {
   admin: "error",
   editor: "warning",
   viewer: "info",
-}
+};
 
 type UserTableProps = {
-  data: User[]
-  isLoading: boolean
-  className?: string
-}
+  data: User[];
+  isLoading: boolean;
+  className?: string;
+};
 
 function UserTable({ data, isLoading, className }: UserTableProps) {
-  const [page, setPage] = useState(1)
-  const [deletingUser, setDeletingUser] = useState<User | null>(null)
+  const [page, setPage] = useState(1);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
 
-  const totalPages = Math.ceil(data.length / PAGE_SIZE)
-  const paginated = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const totalPages = Math.ceil(data.length / PAGE_SIZE);
+  const paginated = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const deleteMutation = useMutation({
+    mutationKey: ["users", "delete"],
+    mutationFn: (id: User["id"]) => deleteUser(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error) => {
+      alert("Error: " + error.message);
+    },
+  });
 
   const columns: Column<User>[] = [
     { key: "id", label: "ID" },
@@ -70,6 +88,7 @@ function UserTable({ data, isLoading, className }: UserTableProps) {
               <Pencil />
             </Link>
           </Button>
+
           <Button
             variant="ghost"
             size="icon-sm"
@@ -81,7 +100,7 @@ function UserTable({ data, isLoading, className }: UserTableProps) {
         </div>
       ),
     },
-  ]
+  ];
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
@@ -108,12 +127,17 @@ function UserTable({ data, isLoading, className }: UserTableProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive">Delete</AlertDialogAction>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => deleteMutation.mutate(deletingUser?.id ?? "")}
+            >
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }
 
-export { UserTable }
+export { UserTable };

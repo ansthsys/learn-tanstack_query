@@ -1,10 +1,59 @@
-import { Link } from "react-router"
-import { ArrowLeft, Plus } from "lucide-react"
-import { Button } from "@/components/atoms/ui/button"
-import { PageHeader } from "@/components/molecules/PageHeader"
-import { UserForm } from "@/components/organisms/UserForm"
+import { useState, type SubmitEvent } from "react";
+import { Link, useNavigate } from "react-router";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/atoms/ui/button";
+import { PageHeader } from "@/components/molecules/PageHeader";
+import { UserForm } from "@/components/organisms/UserForm";
+import { createUser, type CreateUserPayload } from "@/api/users";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+const defaultValue: CreateUserPayload = {
+  name: "",
+  email: "",
+  role: "viewer",
+  active: false,
+};
 
 function UsersCreate() {
+  const [userForm, setUserForm] = useState<CreateUserPayload>(defaultValue);
+
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationKey: ["users", "create"],
+    mutationFn: (payload: CreateUserPayload) => createUser(payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
+      setUserForm(defaultValue);
+      void navigate("/");
+    },
+    onError: (error) => {
+      alert("Error: " + error.message);
+    },
+  });
+
+  const onValuesChange = <K extends keyof CreateUserPayload>(
+    key: K,
+    value: CreateUserPayload[K],
+  ) => {
+    setUserForm((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const validateForm = (payload: CreateUserPayload) => {
+    if (!payload.email || !payload.name) return true;
+    return false;
+  };
+
+  const onSubmitForm = (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (validateForm(userForm)) return;
+    createMutation.mutate(userForm);
+  };
+
   return (
     <div className="flex flex-col gap-6 py-8">
       <PageHeader
@@ -21,20 +70,17 @@ function UsersCreate() {
       />
 
       <div className="max-w-md">
-        <UserForm />
-      </div>
-
-      <div className="flex gap-2">
-        <Button variant="outline" asChild>
-          <Link to="/">Cancel</Link>
-        </Button>
-        <Button disabled>
-          <Plus />
-          <span>Create</span>
-        </Button>
+        <UserForm
+          isLoading={createMutation.isPending}
+          isDisabled={createMutation.isPending}
+          values={userForm}
+          submitText="Create"
+          onValuesChange={onValuesChange}
+          onSubmitForm={onSubmitForm}
+        />
       </div>
     </div>
-  )
+  );
 }
 
-export default UsersCreate
+export default UsersCreate;

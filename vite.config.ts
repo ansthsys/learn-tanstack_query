@@ -15,4 +15,9 @@ export default defineConfig({
       "@": resolve(import.meta.dirname, "src"),
     },
   },
+  server: {
+    watch: {
+      ignored: [resolve(import.meta.dirname, "api/**")],
+    },
+  },
 });

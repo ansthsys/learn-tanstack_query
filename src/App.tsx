@@ -6,6 +6,7 @@ import UsersEdit from '@/components/pages/UsersEdit'
 import Posts from '@/components/pages/Posts'
 import Comments from '@/components/pages/Comments'
 import About from '@/components/pages/About'
+import NotFound from '@/components/pages/NotFound'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/posts" element={<Posts />} />
           <Route path="/comments" element={<Comments />} />
           <Route path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

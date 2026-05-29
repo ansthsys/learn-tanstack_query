@@ -1,10 +1,12 @@
 import http from "./http";
 
+export type RoleEnum = "admin" | "editor" | "viewer";
+
 export type User = {
-  id: number;
+  id: string;
   name: string;
   email: string;
-  role: "admin" | "editor" | "viewer";
+  role: RoleEnum;
   active: boolean;
 };
 
@@ -14,11 +16,11 @@ export type UpdateUserPayload = Partial<CreateUserPayload>;
 export const getUsers = async (
   params?: Record<string, string>,
 ): Promise<User[]> => {
-  const { data } = await http.get<User[]>("/users", { params })
-  return data
-}
+  const { data } = await http.get<User[]>("/users", { params });
+  return data;
+};
 
-export const getUserById = async (id: number): Promise<User> => {
+export const getUserById = async (id: string): Promise<User> => {
   const { data } = await http.get<User>(`/users/${id}`);
   return data;
 };
@@ -29,21 +31,21 @@ export const createUser = async (payload: CreateUserPayload): Promise<User> => {
 };
 
 export const updateUser = async (
-  id: number,
-  payload: UpdateUserPayload
+  id: string,
+  payload: UpdateUserPayload,
 ): Promise<User> => {
   const { data } = await http.put<User>(`/users/${id}`, payload);
   return data;
 };
 
 export const patchUser = async (
-  id: number,
-  payload: UpdateUserPayload
+  id: string,
+  payload: UpdateUserPayload,
 ): Promise<User> => {
   const { data } = await http.patch<User>(`/users/${id}`, payload);
   return data;
 };
 
-export const deleteUser = async (id: number): Promise<void> => {
+export const deleteUser = async (id: string): Promise<void> => {
   await http.delete(`/users/${id}`);
 };
