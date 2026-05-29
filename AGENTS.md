@@ -18,6 +18,8 @@ JSON Server di `api/db.json` (port 3001).
 | `b194b2a` | `feat: add user filtering (search name, role, status)` |
 | `a11edb5` | `chore: fix agents chapter numbering and update structure` |
 | `afb808a` | `feat: implement chapter 03 - query keys dinamis` |
+| `0a5a37e` | `feat: implement create, edit, delete user mutation` |
+| `e03e359` | `chore: align id types in posts and comments` |
 
 ## Struktur Folder
 
@@ -47,10 +49,11 @@ src/
 │   │   └── AppLayout.tsx     Navbar + Outlet
 │   └── pages/
 │       ├── Home.tsx          useQuery(["users", filters]) → UserTable
-│       ├── UsersCreate.tsx   create user form page (no mutation yet)
-│       ├── UsersEdit.tsx     edit user form page + delete alert dialog (no mutation yet)
+│       ├── UsersCreate.tsx   create user form page + useMutation(createUser)
+│       ├── UsersEdit.tsx     edit/delete user page — inner/outer + dirtyFields
 │       ├── Posts.tsx         3 query key demos + hierarchical invalidation
 │       ├── Comments.tsx      dependent query — post → comments
+│       ├── NotFound.tsx      404 page (user not found + catch-all route)
 │       └── About.tsx         placeholder
 ├── utils/classname.ts        cn()
 ├── App.tsx                   layout route pattern
@@ -94,29 +97,24 @@ src/
 | 01 — Setup & QueryClient | ✅ Done | QueryClient, Provider, DevTools |
 | 02 — useQuery Dasar | ✅ Done | Fetch user list, loading/empty states, pagination, navbar, filtering |
 | 03 — Query Keys Dinamis | ✅ Done | Query key dependency, `enabled`, cache behavior, hierarchical invalidation |
-| 04 — useMutation | ⏳ Next | Create, update, delete user via `useMutation` + `invalidateQueries` |
-| 05 — Optimistic Update | ⏳ | Cache update before server response |
-| 06-07 — Pagination & Infinite Query | ⏳ | Server-side pagination, `useInfiniteQuery` |
+| 04 — useMutation | ✅ Done | Controlled form + useMutation, invalidateQueries, navigate, delete user |
+| 05 — Optimistic Update | ⏳ | Comment create/delete — cache update before server response |
+| 06 — Server Pagination | ⏳ | Posts list — `_page`/`_limit` + pagination button |
+| 07 — Infinite Query | ⏳ | Comments — `useInfiniteQuery` + load more |
 | 08-14 — Advanced | ⏳ | Refetch, retry, stale time, parallel & dependent query |
 
-## Session Resume (22 May 2026)
+## Session Resume (29 May 2026)
 
-### What was built
+### Chapter 04 — useMutation ✅ Done
 
-| Komponen | Level | Keterangan |
-|----------|-------|------------|
-| Navbar | organism | Responsive, hamburger → Sheet (shadcn) |
-| AppLayout | template | Navbar + `<Outlet />` + `max-w-6xl` container |
-| Badge | atom | Custom — primary/secondary/success/warning/info/error/muted |
-| PageHeader | molecule | title + description + action slot |
-| Table | molecule | Generic `<T>`, loading skeleton, empty state, data render |
-| Pagination | molecule | page / totalPages / onPageChange |
-| UserFilters | molecule | search name + role select + status select — pure props |
-| UserTable | organism | Columns + Badge render + Actions (Edit/Delete) + Pagination — no fetching |
-| UserForm | organism | Form fields layout (name, email, role, active) |
-| Home | page | `useQuery(["users", filters], getUsers)` + filter state → `UserTable` |
-| UsersCreate | page | Create user form (no mutation yet) |
-| UsersEdit | page | Edit user form + delete AlertDialog (no mutation yet) |
+| File | Perubahan |
+|------|-----------|
+| `UsersCreate.tsx` | `useMutation(createUser)`, `onSuccess` → invalidate + navigate, validasi form |
+| `UsersEdit.tsx` | inner/outer pattern, dirtyFields, `useQuery` load user, `updateMutation`, `deleteMutation` |
+| `UserTable.tsx` | delete AlertDialog wired ke `deleteMutation` |
+| `NotFound.tsx` | 404 halaman untuk user tidak ditemukan + catch-all route |
+| `UserForm.tsx` | fix import path, `void` wrapper di submit |
+| `vite.config.ts` | `server.watch.ignored` untuk cegah HMR reload saat json-server nulis |
 
 ### State management pattern
 
@@ -136,30 +134,20 @@ Home.tsx
         └── Badge(row.render) — inline via column def
 ```
 
-## Session Resume (28 May 2026)
+### Strategy Chapters 05-07
 
-### What was built
+| Chapter | Konsep | Implementasi |
+|---------|--------|--------------|
+| 05 | Optimistic Update | Comment create/delete — `onMutate` insert cache, `onError` rollback, `onSettled` refetch |
+| 06 | Server Pagination | Posts list — ganti `_page`/`_limit` + `Link` header `totalCount` + pagination button |
+| 07 | Infinite Query | Comments — `useInfiniteQuery` + load more button |
 
-| Komponen | Level | Keterangan |
-|----------|-------|------------|
-| posts.ts | api | Post CRUD + getPostsByUser — same pattern as users.ts |
-| comments.ts | api | Comment CRUD + getCommentsByPost — same pattern as users.ts |
-| Posts | page | 3 sections: all posts (`["posts"]`), filter by user (`["posts", "byUser", userId]` with `enabled`), post detail (`["posts", "detail", postId]` with `enabled`) + hierarchical invalidation button |
-| Comments | page | Dependent query: enter postId → fetch post + fetch comments (both gated on `enabled`) |
+### Files terkait 05-07
 
-### Concepts demonstrated
-
-| Konsep | Dimana |
-|--------|--------|
-| Different keys = separate cache | `["posts"]` vs `["posts", "byUser", 1]` |
-| Cache hit | Switch filter back to previously selected user — instant render |
-| `enabled` conditional fetch | Post Detail & By User — no query runs until user provides input |
-| Hierarchical invalidation | `invalidateQueries(["posts"])` refetches all `["posts", ...]` keys |
-| Dependent query | Comments page — both post and comments queries gated on postId |
-
-### Next up — Chapter 04: useMutation
-
-- `useMutation` untuk `createUser`, `updateUser`, `deleteUser`
-- `invalidateQueries({ queryKey: ["users"] })` setelah mutation success
-- Un-disable buttons di `UsersCreate.tsx` dan `UsersEdit.tsx`
-- Navigasi otomatis (`navigate("/")`) setelah create/update sukses
+| File | Peran |
+|------|-------|
+| `src/api/posts.ts` | CRUD + `getPosts` (akan pake `_page`/`_limit` di chapter 06) |
+| `src/api/comments.ts` | CRUD + `getCommentsByPost` (akan pake `useInfiniteQuery` di chapter 07) |
+| `src/components/pages/Posts.tsx` | Query demo (saat ini). Di chapter 06: tambah pagination server |
+| `src/components/pages/Comments.tsx` | Dependent query (saat ini). Di chapter 05 + 07: tambah form create, delete, infinite |
+| `src/components/molecules/Table.tsx` | Generic table (bisa dipakai ulang untuk posts) |
