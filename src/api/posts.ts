@@ -1,10 +1,10 @@
 import http from "./http";
 
 export type Post = {
-  id: number;
+  id: string;
   title: string;
   body: string;
-  userId: number;
+  userId: string;
   likes: number;
   published: boolean;
   createdAt: string;
@@ -20,12 +20,12 @@ export const getPosts = async (
   return data;
 };
 
-export const getPostById = async (id: number): Promise<Post> => {
+export const getPostById = async (id: string): Promise<Post> => {
   const { data } = await http.get<Post>(`/posts/${id}`);
   return data;
 };
 
-export const getPostsByUser = async (userId: number): Promise<Post[]> => {
+export const getPostsByUser = async (userId: string): Promise<Post[]> => {
   const { data } = await http.get<Post[]>("/posts", {
     params: { userId: String(userId) },
   });
@@ -38,7 +38,7 @@ export const createPost = async (payload: CreatePostPayload): Promise<Post> => {
 };
 
 export const updatePost = async (
-  id: number,
+  id: string,
   payload: UpdatePostPayload,
 ): Promise<Post> => {
   const { data } = await http.put<Post>(`/posts/${id}`, payload);
@@ -46,13 +46,13 @@ export const updatePost = async (
 };
 
 export const patchPost = async (
-  id: number,
+  id: string,
   payload: UpdatePostPayload,
 ): Promise<Post> => {
   const { data } = await http.patch<Post>(`/posts/${id}`, payload);
   return data;
 };
 
-export const deletePost = async (id: number): Promise<void> => {
+export const deletePost = async (id: string): Promise<void> => {
   await http.delete(`/posts/${id}`);
 };
