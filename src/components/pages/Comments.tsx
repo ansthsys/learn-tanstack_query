@@ -11,13 +11,13 @@ function Comments() {
 
   const post = useQuery({
     queryKey: ["posts", "detail", postId],
-    queryFn: () => getPostById(Number(postId)),
+    queryFn: () => getPostById(postId),
     enabled: postId.length > 0,
   })
 
   const comments = useQuery({
     queryKey: ["comments", { postId }],
-    queryFn: () => getCommentsByPost(Number(postId)),
+    queryFn: () => getCommentsByPost(postId),
     enabled: postId.length > 0,
   })
 

@@ -56,13 +56,13 @@ function Posts() {
 
   const byUser = useQuery({
     queryKey: ["posts", "byUser", userId],
-    queryFn: () => getPostsByUser(Number(userId)),
+    queryFn: () => getPostsByUser(userId),
     enabled: userId !== "all",
   })
 
   const detail = useQuery({
     queryKey: ["posts", "detail", postId],
-    queryFn: () => getPostById(Number(postId)),
+    queryFn: () => getPostById(postId),
     enabled: postId.length > 0,
   })
 
