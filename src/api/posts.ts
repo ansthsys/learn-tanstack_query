@@ -1,10 +1,5 @@
 import http from "./http";
 
-export type PaginatedResult<T> = {
-  data: T[]
-  total: number
-}
-
 export type Post = {
   id: string;
   title: string;
@@ -19,14 +14,10 @@ export type CreatePostPayload = Omit<Post, "id">;
 export type UpdatePostPayload = Partial<CreatePostPayload>;
 
 export const getPosts = async (
-  page: number,
-  limit: number,
-): Promise<PaginatedResult<Post>> => {
-  const res = await http.get<Post[]>("/posts", {
-    params: { _page: page, _limit: limit },
-  })
-  const total = Number(res.headers["x-total-count"]) || 0
-  return { data: res.data, total }
+  params?: Record<string, string>,
+): Promise<Post[]> => {
+  const { data } = await http.get<Post[]>("/posts", { params });
+  return data;
 };
 
 export const getPostById = async (id: string): Promise<Post> => {
