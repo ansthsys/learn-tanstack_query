@@ -1,12 +1,16 @@
-import { useState, useEffect } from "react"
-import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { getPostsPaginated, type Post } from "@/api/posts"
-import { Badge } from "@/components/atoms/Badge"
-import { Table, type Column } from "@/components/molecules/Table"
-import { PageHeader } from "@/components/molecules/PageHeader"
-import { Button } from "@/components/atoms/ui/button"
+import { useState, useEffect } from "react";
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import { getPostsPaginated, type Post } from "@/api/posts";
+import { Badge } from "@/components/atoms/Badge";
+import { Table, type Column } from "@/components/molecules/Table";
+import { PageHeader } from "@/components/molecules/PageHeader";
+import { Button } from "@/components/atoms/ui/button";
 
-const LIMIT = 3
+const LIMIT = 3;
 
 const columns: Column<Post>[] = [
   { key: "id", label: "ID" },
@@ -35,39 +39,38 @@ const columns: Column<Post>[] = [
       <span className="text-sm text-muted-foreground">{post.createdAt}</span>
     ),
   },
-]
+];
 
 function Posts() {
-  const [page, setPage] = useState(1)
-  const queryClient = useQueryClient()
+  const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
 
-  const {
-    data,
-    isLoading,
-    isPlaceholderData,
-    isFetching,
-  } = useQuery({
+  const { data, isLoading, isPlaceholderData, isFetching } = useQuery({
     queryKey: ["posts", "paginated", page],
     queryFn: () => getPostsPaginated({ page, limit: LIMIT }),
     placeholderData: keepPreviousData,
-  })
+  });
 
   useEffect(() => {
     if (data?.hasNext) {
       void queryClient.prefetchQuery({
         queryKey: ["posts", "paginated", page + 1],
         queryFn: () => getPostsPaginated({ page: page + 1, limit: LIMIT }),
-      })
+      });
     }
-  }, [page, data, queryClient])
+  }, [page, data, queryClient]);
 
-  if (isLoading) return (
-    <div className="py-8 text-center text-muted-foreground">Loading...</div>
-  )
+  if (isLoading)
+    return (
+      <div className="py-8 text-center text-muted-foreground">Loading...</div>
+    );
 
   return (
     <div className="flex flex-col gap-6 py-8">
-      <PageHeader title="Posts" description="Server-side pagination with TanStack Query" />
+      <PageHeader
+        title="Posts"
+        description="Server-side pagination with TanStack Query"
+      />
 
       {isFetching && !isLoading && (
         <p className="text-sm text-muted-foreground">
@@ -87,7 +90,7 @@ function Posts() {
         <div className="flex items-center justify-center gap-2 flex-wrap">
           <Button
             variant="outline"
-            disabled={!data.hasPrev || isFetching}
+            disabled={isPlaceholderData || !data.hasPrev || isFetching}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
             ← Prev
@@ -105,19 +108,20 @@ function Posts() {
 
           <Button
             variant="outline"
-            disabled={!data.hasNext || isFetching}
+            disabled={isPlaceholderData || !data.hasNext || isFetching}
             onClick={() => setPage((p) => p + 1)}
           >
             Next →
           </Button>
 
           <span className="text-sm text-muted-foreground">
-            Halaman {data.currentPage} dari {data.totalPages} ({data.totalItems} post)
+            Halaman {data.currentPage} dari {data.totalPages} ({data.totalItems}{" "}
+            post)
           </span>
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default Posts
+export default Posts;
