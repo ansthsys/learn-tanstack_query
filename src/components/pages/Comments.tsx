@@ -1,25 +1,25 @@
-import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { getPostById } from "@/api/posts"
-import { getCommentsByPost } from "@/api/comments"
-import { Badge } from "@/components/atoms/Badge"
-import { Input } from "@/components/atoms/ui/input"
-import { PageHeader } from "@/components/molecules/PageHeader"
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getPostById } from "@/api/posts";
+import { getCommentsByPost } from "@/api/comments";
+import { Badge } from "@/components/atoms/Badge";
+import { Input } from "@/components/atoms/ui/input";
+import { PageHeader } from "@/components/molecules/PageHeader";
 
 function Comments() {
-  const [postId, setPostId] = useState("")
+  const [postId, setPostId] = useState("");
 
   const post = useQuery({
     queryKey: ["posts", "detail", postId],
     queryFn: () => getPostById(postId),
     enabled: postId.length > 0,
-  })
+  });
 
   const comments = useQuery({
     queryKey: ["comments", { postId }],
     queryFn: () => getCommentsByPost(postId),
     enabled: postId.length > 0,
-  })
+  });
 
   return (
     <div className="flex flex-col gap-6 py-8">
@@ -80,15 +80,17 @@ function Comments() {
               Comments
               {comments.data && (
                 <span className="ml-1 text-sm font-normal text-muted-foreground">
-                  ({comments.data.length})
+                  ({comments.data.totalItems})
                 </span>
               )}
             </h2>
             {comments.isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading comments...</p>
-            ) : comments.data && comments.data.length > 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Loading comments...
+              </p>
+            ) : comments.data && comments.data.totalItems > 0 ? (
               <div className="flex flex-col gap-3">
-                {comments.data.map((comment) => (
+                {comments.data.comments.map((comment) => (
                   <div key={comment.id} className="rounded-md border p-3">
                     <p className="text-sm text-muted-foreground">
                       User #{comment.userId}
@@ -109,7 +111,7 @@ function Comments() {
         </>
       )}
     </div>
-  )
+  );
 }
 
-export default Comments
+export default Comments;

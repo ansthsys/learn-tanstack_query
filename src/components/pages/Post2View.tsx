@@ -186,13 +186,13 @@ function Post2View() {
           {commentQuery.isLoading ? (
             <span className="block w-8 h-6 animate-pulse rounded-md border bg-gray-200" />
           ) : (
-            `(${commentQuery.data?.length})`
+            `(${commentQuery.data?.totalItems})`
           )}
         </h2>
         {!commentQuery.isLoading ? (
-          commentQuery.data && commentQuery.data.length > 0 ? (
+          commentQuery.data && commentQuery.data.totalItems > 0 ? (
             <div className="flex flex-col gap-3">
-              {commentQuery.data.map((comment) => (
+              {commentQuery.data.comments.map((comment) => (
                 <div key={comment.id} className="rounded-md border p-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">

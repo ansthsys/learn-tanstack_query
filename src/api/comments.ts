@@ -1,4 +1,5 @@
 import http from "./http";
+import type { JsonServerPage } from "./posts";
 
 export type Comment = {
   id: string;
@@ -11,11 +12,30 @@ export type Comment = {
 export type CreateCommentPayload = Omit<Comment, "id">;
 export type UpdateCommentPayload = Partial<CreateCommentPayload>;
 
-export const getComments = async (
-  params?: Record<string, string>,
-): Promise<Comment[]> => {
-  const { data } = await http.get<Comment[]>("/comments", { params });
-  return data;
+export type CommentPaginatedResult = {
+  comments: Comment[];
+  totalPages: number;
+  totalItems: number;
+  currentPage: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+};
+
+export const getCommentsPaginated = async ({
+  page = 1,
+  limit = 3,
+}: { page?: number; limit?: number } = {}): Promise<CommentPaginatedResult> => {
+  const res = await http.get<JsonServerPage<Comment>>("/comments", {
+    params: { _page: page, _per_page: limit },
+  });
+  return {
+    comments: res.data.data,
+    totalPages: res.data.last,
+    totalItems: res.data.items,
+    currentPage: page,
+    hasNext: res.data.next !== null,
+    hasPrev: res.data.prev !== null,
+  };
 };
 
 export const getCommentById = async (id: string): Promise<Comment> => {
@@ -23,11 +43,21 @@ export const getCommentById = async (id: string): Promise<Comment> => {
   return data;
 };
 
-export const getCommentsByPost = async (postId: string): Promise<Comment[]> => {
-  const { data } = await http.get<Comment[]>("/comments", {
-    params: { postId: String(postId) },
+export const getCommentsByPost = async (
+  postId: string,
+  { page = 1, limit = 3 }: { page?: number; limit?: number } = {},
+): Promise<CommentPaginatedResult> => {
+  const res = await http.get<JsonServerPage<Comment>>("/comments", {
+    params: { postId: String(postId), _page: page, _per_page: limit },
   });
-  return data;
+  return {
+    comments: res.data.data,
+    totalPages: res.data.last,
+    totalItems: res.data.items,
+    currentPage: page,
+    hasNext: res.data.next !== null,
+    hasPrev: res.data.prev !== null,
+  };
 };
 
 export const createComment = async (
