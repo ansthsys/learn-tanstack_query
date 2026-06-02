@@ -4,20 +4,18 @@ import { Button } from "@/components/atoms/ui/button";
 import { Input } from "@/components/atoms/ui/input";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { useQuery } from "@tanstack/react-query";
-import { getPosts } from "@/api/posts";
+import { getPostsPaginated } from "@/api/posts";
 
 function Post2Page() {
   const [postId, setPostId] = useState("");
   const navigate = useNavigate();
 
   const postQuery = useQuery({
-    queryKey: ["posts"],
-    queryFn: () => getPosts(),
-    select: (d) => {
-      return {
-        length: d.length,
-      };
-    },
+    queryKey: ["posts", "count"],
+    queryFn: () => getPostsPaginated({ page: 1, limit: 1 }),
+    select: (d) => ({
+      length: d.totalItems,
+    }),
   });
 
   return (
