@@ -111,10 +111,10 @@ src/
 | 04 — useMutation | ✅ Done | Controlled form + useMutation, invalidateQueries, navigate, delete user |
 | 05 — Optimistic Update | ✅ Done | Comment create/delete — `onMutate` cancelQueries + setQueryData, `onError` rollback, `onSettled` invalidate |
 | 06 — Server Pagination | ✅ Done | `_page`/`_per_page` (json-server v1) + `keepPreviousData` + `prefetchQuery` + pagination button |
-| 07 — Infinite Query | ⏳ | Comments — `useInfiniteQuery` + load more |
+| 07 — Infinite Query | ✅ Done | `useInfiniteQuery` with optimistic update — `InfiniteData<T>`, `getNextPageParam`, `fetchNextPage`, Load More button |
 | 08-14 — Advanced | ⏳ | Refetch, retry, stale time, parallel & dependent query |
 
-## Session Resume (29 May 2026)
+## Session Resume (29 May — 02 Jun 2026)
 
 ### Chapter 04 — useMutation ✅ Done
 
@@ -140,6 +140,15 @@ src/
 | `api/db.json` | Normalisasi — semua ID nanoid string |
 | `scripts/seed.mjs` | Seed generator dengan nanoid |
 | `api/comments.ts` | `deleteComment(id: string)` |
+
+### Chapter 07 — Infinite Query ✅ Done (02 Jun 2026)
+
+| File | Perubahan |
+|------|-----------|
+| `Post2View.tsx` | `useQuery` → `useInfiniteQuery` dengan `initialPageParam`, `getNextPageParam`, `fetchNextPage`, Load More button |
+| `Post2View.tsx` | Optimistic update disesuaikan: `InfiniteData<CommentPaginatedResult>` — insert/delete di `pages` level |
+
+Konsep: `data.pages.flatMap(p => p.comments)` render akumulasi data, `getNextPageParam` kontrol `hasNextPage`, `fetchNextPage()` trigger halaman berikutnya.
 
 ### Optimistic Update Pattern (Chapter 05)
 
@@ -179,17 +188,17 @@ Home.tsx
 |---------|--------|--------------|
 | 05 | Optimistic Update | Comment create/delete — `onMutate` insert cache, `onError` rollback, `onSettled` refetch |
 | 06 | Server Pagination | Posts list — ganti `_page`/`_limit` + `Link` header `totalCount` + pagination button |
-| 07 | Infinite Query | Comments — `useInfiniteQuery` + load more button |
+| 07 | Infinite Query | Post2View — `useInfiniteQuery` + load more button + `InfiniteData<T>` optimistic update |
 
 ### Files terkait 05-07
 
 | File | Peran |
 |------|-------|
-| `src/api/posts.ts` | CRUD + `getPosts` (akan pake `_page`/`_limit` di chapter 06) |
-| `src/api/comments.ts` | CRUD + `getCommentsByPost` (akan pake `useInfiniteQuery` di chapter 07) |
-| `src/components/pages/Posts.tsx` | Query demo (saat ini). Di chapter 06: tambah pagination server |
-| `src/components/pages/Comments.tsx` | Dependent query (saat ini). Di chapter 07: tambah infinite query |
-| `src/components/molecules/Table.tsx` | Generic table (bisa dipakai ulang untuk posts) |
+| `src/api/posts.ts` | CRUD + `getPostsPaginated` (Chapter 06) |
+| `src/api/comments.ts` | CRUD + `getCommentsByPost` paginated (Chapter 07) + `getCommentsPaginated` |
+| `src/components/pages/Posts.tsx` | Server pagination (Chapter 06) |
+| `src/components/pages/Post2View.tsx` | Infinite query + optimistic update (Chapter 07) |
+| `src/components/molecules/Table.tsx` | Generic table (dipakai di Posts) |
 
 ## Kesalahan
 
