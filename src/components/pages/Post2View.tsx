@@ -57,7 +57,7 @@ function Post2View() {
     userId: USER_COMMENT_ID,
     postId: postQuery.data?.id ?? "",
     body: form.trim(),
-    createdAt: Date().toString().split("T")[0],
+    createdAt: new Date().toISOString().split("T")[0],
   });
 
   const createMutation = useMutation({
@@ -72,14 +72,11 @@ function Post2View() {
         "comments",
       ]);
 
-      queryClient.setQueryData<Comment[]>(
-        ["posts", id, "comments"],
-        (old) => {
-          const newPayload = { ...payload, id: crypto.randomUUID() };
-          if (!old) return [newPayload];
-          return [...old, newPayload];
-        },
-      );
+      queryClient.setQueryData<Comment[]>(["posts", id, "comments"], (old) => {
+        const newPayload = { ...payload, id: crypto.randomUUID() };
+        if (!old) return [newPayload];
+        return [...old, newPayload];
+      });
 
       return { prevComments };
     },
@@ -122,7 +119,10 @@ function Post2View() {
     },
     onError: (_err, _deletedId, context) => {
       if (context?.prevComments) {
-        queryClient.setQueryData(["posts", id, "comments"], context.prevComments);
+        queryClient.setQueryData(
+          ["posts", id, "comments"],
+          context.prevComments,
+        );
       }
     },
     onSettled: () => {
@@ -142,7 +142,7 @@ function Post2View() {
     createMutation.mutate(payload);
   };
 
-  if (!postQuery.data) {
+  if (!postQuery.data && !postQuery.isLoading) {
     return <NotFound />;
   }
 
@@ -242,7 +242,12 @@ function Post2View() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={() => deletingId !== null && onDeleteComment(deletingId)}>Delete</AlertDialogAction>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => deletingId !== null && onDeleteComment(deletingId)}
+            >
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
