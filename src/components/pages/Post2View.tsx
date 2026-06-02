@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Link, useParams } from "react-router";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { Button } from "@/components/atoms/ui/button";
@@ -19,9 +19,16 @@ import {
   deleteComment,
   getCommentsByPost,
   type Comment,
+  type CommentPaginatedResult,
   type CreateCommentPayload,
 } from "@/api/comments";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import { getPostById } from "@/api/posts";
 import { getUserById } from "@/api/users";
 import NotFound from "./NotFound";
@@ -47,10 +54,16 @@ function Post2View() {
     enabled: !!postQuery.data?.userId,
   });
 
-  const commentQuery = useQuery({
+  const commentQuery = useInfiniteQuery({
     queryKey: ["posts", id, "comments"],
-    queryFn: () => getCommentsByPost(id ?? ""),
+    queryFn: ({ pageParam }) =>
+      getCommentsByPost(id ?? "", { page: pageParam, limit: 5 }),
+    initialPageParam: 1,
     enabled: !!id,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext ? lastPage.currentPage + 1 : undefined,
+    getPreviousPageParam: (firstPage) =>
+      firstPage.hasNext ? firstPage.currentPage - 1 : undefined,
   });
 
   const createPayload = (form: typeof commentForm): CreateCommentPayload => ({
@@ -66,21 +79,28 @@ function Post2View() {
     onMutate: async (payload) => {
       await queryClient.cancelQueries({ queryKey: ["posts", id, "comments"] });
 
-      const prevComments = queryClient.getQueryData<Comment[]>([
-        "posts",
-        id,
-        "comments",
-      ]);
+      const prevComments = queryClient.getQueryData<
+        InfiniteData<CommentPaginatedResult>
+      >(["posts", id, "comments"]);
 
-      queryClient.setQueryData<Comment[]>(["posts", id, "comments"], (old) => {
-        const newPayload = { ...payload, id: crypto.randomUUID() };
-        if (!old) return [newPayload];
-        return [...old, newPayload];
-      });
+      queryClient.setQueryData<InfiniteData<CommentPaginatedResult>>(
+        ["posts", id, "comments"],
+        (old) => {
+          if (!old) return old;
+          const newComment = { ...payload, id: crypto.randomUUID() };
+          return {
+            ...old,
+            pages: old.pages.map((page, index) =>
+              index === 0
+                ? { ...page, comments: [newComment, ...page.comments] }
+                : page,
+            ),
+          };
+        },
+      );
 
       return { prevComments };
     },
-    // onSuccess: (res, payload) => {},
     onError: (err, _, context) => {
       if (context?.prevComments) {
         queryClient.setQueryData(
@@ -104,15 +124,22 @@ function Post2View() {
     onMutate: async (deletedId) => {
       await queryClient.cancelQueries({ queryKey: ["posts", id, "comments"] });
 
-      const prevComments = queryClient.getQueryData<Comment[]>([
-        "posts",
-        id,
-        "comments",
-      ]);
+      const prevComments = queryClient.getQueryData<
+        InfiniteData<CommentPaginatedResult>
+      >(["posts", id, "comments"]);
 
-      queryClient.setQueryData<Comment[]>(
+      queryClient.setQueryData<InfiniteData<CommentPaginatedResult>>(
         ["posts", id, "comments"],
-        (old) => old?.filter((c) => c.id !== deletedId) ?? [],
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              comments: page.comments.filter((c) => c.id !== deletedId),
+            })),
+          };
+        },
       );
 
       return { prevComments };
@@ -180,36 +207,40 @@ function Post2View() {
         <div className="w-full h-32 animate-pulse rounded-md border bg-gray-200" />
       )}
 
-      <section>
+      <section className="space-y-5">
         <h2 className="mb-3 text-lg font-semibold inline-flex items-center gap-1.5">
           Comments{" "}
           {commentQuery.isLoading ? (
             <span className="block w-8 h-6 animate-pulse rounded-md border bg-gray-200" />
           ) : (
-            `(${commentQuery.data?.totalItems})`
+            `(${commentQuery.data?.pageParams.length})`
           )}
         </h2>
         {!commentQuery.isLoading ? (
-          commentQuery.data && commentQuery.data.totalItems > 0 ? (
+          commentQuery.data && commentQuery.data.pages.length > 0 ? (
             <div className="flex flex-col gap-3">
-              {commentQuery.data.comments.map((comment) => (
-                <div key={comment.id} className="rounded-md border p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <p className="mt-1">{comment.body}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {comment.createdAt}
-                      </p>
+              {commentQuery.data.pages.map((comment, idx) => (
+                <Fragment key={idx}>
+                  {comment.comments.map((comment) => (
+                    <div key={comment.id} className="rounded-md border p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <p className="mt-1">{comment.body}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {comment.createdAt}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => setDeletingId(comment.id)}
+                        >
+                          <Trash2 className="text-destructive" />
+                        </Button>
+                      </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => setDeletingId(comment.id)}
-                    >
-                      <Trash2 className="text-destructive" />
-                    </Button>
-                  </div>
-                </div>
+                  ))}
+                </Fragment>
               ))}
             </div>
           ) : (
@@ -225,6 +256,22 @@ function Post2View() {
             ))}
           </div>
         )}
+
+        <div>
+          {commentQuery.hasNextPage && (
+            <Button
+              type="button"
+              disabled={
+                commentQuery.isFetching ||
+                commentQuery.isFetchingNextPage ||
+                commentQuery.isFetchingPreviousPage
+              }
+              onClick={() => void commentQuery.fetchNextPage()}
+            >
+              Load more
+            </Button>
+          )}
+        </div>
       </section>
 
       <section className="sticky bottom-0 bg-white py-5">
