@@ -8,7 +8,6 @@ const run = (cmd: string) => execSync(cmd, { stdio: "inherit" })
 try {
   console.log("Configuring dual push remotes...\n")
 
-  // Hapus semua push URL origin yang ada (kalau ada)
   const pushUrls = execSync("git remote get-url --push --all origin", {
     encoding: "utf-8",
   })
@@ -19,12 +18,11 @@ try {
     execSync(`git remote set-url --delete --push origin "${url.trim()}"`)
   }
 
-  // Set push URL: GitHub (primary) + GitLab (secondary)
   run(`git remote set-url --push origin ${GITHUB_URL}`)
-  console.log("✓ GitHub push URL set")
+  console.log("GitHub push URL set")
 
   run(`git remote set-url --add --push origin ${GITLAB_URL}`)
-  console.log("✓ GitLab push URL added")
+  console.log("GitLab push URL added")
 
   console.log("\nDone! Run `git push origin main` to push to both repos.\n")
 

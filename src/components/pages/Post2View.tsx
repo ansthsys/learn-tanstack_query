@@ -18,7 +18,6 @@ import {
   createComment,
   deleteComment,
   getCommentsByPost,
-  type Comment,
   type CommentPaginatedResult,
   type CreateCommentPayload,
 } from "@/api/comments";

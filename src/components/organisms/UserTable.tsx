@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { Pencil, Trash2 } from "lucide-react";
 import { deleteUser, type User } from "@/api/users";
 import { Button } from "@/components/atoms/ui/button";
@@ -40,7 +40,6 @@ function UserTable({ data, isLoading, className }: UserTableProps) {
   const [page, setPage] = useState(1);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
 
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const totalPages = Math.ceil(data.length / PAGE_SIZE);
