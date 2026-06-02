@@ -3,13 +3,23 @@ import { execSync } from "child_process"
 const GITHUB_URL = "https://github.com/ansthsys/learn-tanstack_query"
 const GITLAB_URL = "https://gitlab.aqi.co.id/azmiy.thufail/learn-tanstack_query.git"
 
-const run = (cmd: string) => {
-  execSync(cmd, { stdio: "inherit" })
-}
+const run = (cmd: string) => execSync(cmd, { stdio: "inherit" })
 
 try {
   console.log("Configuring dual push remotes...\n")
 
+  // Hapus semua push URL origin yang ada (kalau ada)
+  const pushUrls = execSync("git remote get-url --push --all origin", {
+    encoding: "utf-8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean)
+  for (const url of pushUrls) {
+    execSync(`git remote set-url --delete --push origin "${url.trim()}"`)
+  }
+
+  // Set push URL: GitHub (primary) + GitLab (secondary)
   run(`git remote set-url --push origin ${GITHUB_URL}`)
   console.log("✓ GitHub push URL set")
 
