@@ -142,7 +142,7 @@ function Post2View() {
     createMutation.mutate(payload);
   };
 
-  if (!postQuery.data && !postQuery.isLoading) {
+  if (!postQuery.isLoading && !postQuery.data) {
     return <NotFound />;
   }
 
@@ -161,49 +161,69 @@ function Post2View() {
         }
       />
 
-      <div className="rounded-md border p-4">
-        <div className="flex items-start justify-between gap-4">
-          <h3 className="text-lg font-semibold">{postQuery.data?.title}</h3>
-          <Badge variant={postQuery.data?.published ? "success" : "muted"}>
-            {postQuery.data?.published ? "Published" : "Draft"}
-          </Badge>
+      {!postQuery.isLoading && !userQuery.isLoading ? (
+        <div className="rounded-md border p-4">
+          <div className="flex items-start justify-between gap-4">
+            <h3 className="text-lg font-semibold">{postQuery.data?.title}</h3>
+            <Badge variant={postQuery.data?.published ? "success" : "muted"}>
+              {postQuery.data?.published ? "Published" : "Draft"}
+            </Badge>
+          </div>
+          <p className="mt-2 text-muted-foreground">{postQuery.data?.body}</p>
+          <div className="mt-4 flex gap-4 text-sm text-muted-foreground">
+            <span>{userQuery.data?.name}</span>
+            <span>{postQuery.data?.likes} likes</span>
+            <span>{postQuery.data?.createdAt}</span>
+          </div>
         </div>
-        <p className="mt-2 text-muted-foreground">{postQuery.data?.body}</p>
-        <div className="mt-4 flex gap-4 text-sm text-muted-foreground">
-          <span>{userQuery.data?.name}</span>
-          <span>{postQuery.data?.likes} likes</span>
-          <span>{postQuery.data?.createdAt}</span>
-        </div>
-      </div>
+      ) : (
+        <div className="w-full h-32 animate-pulse rounded-md border bg-gray-200" />
+      )}
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">
-          Comments ({commentQuery.data?.length})
+        <h2 className="mb-3 text-lg font-semibold inline-flex items-center gap-1.5">
+          Comments{" "}
+          {commentQuery.isLoading ? (
+            <span className="block w-8 h-6 animate-pulse rounded-md border bg-gray-200" />
+          ) : (
+            `(${commentQuery.data?.length})`
+          )}
         </h2>
-        {commentQuery.data && commentQuery.data.length > 0 ? (
-          <div className="flex flex-col gap-3">
-            {commentQuery.data.map((comment) => (
-              <div key={comment.id} className="rounded-md border p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <p className="mt-1">{comment.body}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {comment.createdAt}
-                    </p>
+        {!commentQuery.isLoading ? (
+          commentQuery.data && commentQuery.data.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {commentQuery.data.map((comment) => (
+                <div key={comment.id} className="rounded-md border p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <p className="mt-1">{comment.body}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {comment.createdAt}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setDeletingId(comment.id)}
+                    >
+                      <Trash2 className="text-destructive" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => setDeletingId(comment.id)}
-                  >
-                    <Trash2 className="text-destructive" />
-                  </Button>
                 </div>
-              </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No comments yet.</p>
+          )
+        ) : (
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="w-full h-20 animate-pulse rounded-md border bg-gray-200"
+              />
             ))}
           </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">No comments yet.</p>
         )}
       </section>
 
