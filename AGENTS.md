@@ -110,7 +110,7 @@ src/
 | 03 — Query Keys Dinamis | ✅ Done | Query key dependency, `enabled`, cache behavior, hierarchical invalidation |
 | 04 — useMutation | ✅ Done | Controlled form + useMutation, invalidateQueries, navigate, delete user |
 | 05 — Optimistic Update | ✅ Done | Comment create/delete — `onMutate` cancelQueries + setQueryData, `onError` rollback, `onSettled` invalidate |
-| 06 — Server Pagination | ⏳ | Posts list — `_page`/`_limit` + pagination button |
+| 06 — Server Pagination | ✅ Done | `_page`/`_per_page` (json-server v1) + `keepPreviousData` + `prefetchQuery` + pagination button |
 | 07 — Infinite Query | ⏳ | Comments — `useInfiniteQuery` + load more |
 | 08-14 — Advanced | ⏳ | Refetch, retry, stale time, parallel & dependent query |
 
